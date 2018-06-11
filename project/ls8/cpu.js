@@ -5,6 +5,7 @@
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
+const RAM = require('ram.js');
 class CPU {
 
     /**
@@ -14,11 +15,11 @@ class CPU {
         this.ram = ram;
 
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-        
+
         // Special-purpose registers
         this.PC = 0; // Program Counter
     }
-    
+
     /**
      * Store value in memory address, useful for program loading
      */
@@ -54,9 +55,29 @@ class CPU {
      */
     alu(op, regA, regB) {
         switch (op) {
-            case 'MUL':
-                // !!! IMPLEMENT ME
-                break;
+          case 'ADD':
+              return parseInt(regA, 2) + parseInt(regB, 2);
+              break;
+          case 'SUB':
+              return parseInt(regA, 2) - parseInt(regB, 2);
+              break;
+          case 'MUL':
+              return parseInt(regA, 2) * parseInt(regB, 2);
+              break;
+          case 'DIV':
+              return parseInt(regA, 2) / parseInt(regB, 2);
+              break;
+          case 'INC':
+              return parseInt(regA, 2)++;
+              break;
+          case 'DEC':
+              return parseInt(regA, 2)--;
+              break;
+          case 'CMP':
+              if (regA === regB) this.reg.fl = '00000001';
+              else if (regA > regB) this.reg.fl = '00000010';
+              else this.reg.fl = '00000100';
+              break;
         }
     }
 
@@ -88,9 +109,11 @@ class CPU {
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
-        
+
         // !!! IMPLEMENT ME
     }
 }
+
+
 
 module.exports = CPU;
