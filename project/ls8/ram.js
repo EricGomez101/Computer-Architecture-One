@@ -22,7 +22,7 @@ class RAM {
     read(MAR) {
         // !!! IMPLEMENT ME
         // Read the value in address MAR and return it
-        return parseInt(this.mem[parseInt(MAR, 2)], 2);
+        return this.mem[parseInt(MAR, 2)];
     }
 }
 

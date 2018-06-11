@@ -5,7 +5,7 @@
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
-const RAM = require('ram.js');
+const RAM = require('./ram.js');
 class CPU {
 
     /**
@@ -56,16 +56,16 @@ class CPU {
     alu(op, regA, regB) {
         switch (op) {
           case 'ADD':
-              return parseInt(regA, 2) + parseInt(regB, 2);
+              return parseInt(this.reg[parseInt(regA, 2)], 2) + parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
           case 'SUB':
-              return parseInt(regA, 2) - parseInt(regB, 2);
+              return parseInt(this.reg[parseInt(regA, 2)], 2) - parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
           case 'MUL':
-              return parseInt(regA, 2) * parseInt(regB, 2);
+              return parseInt(this.reg[parseInt(regA, 2)], 2) * parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
           case 'DIV':
-              return parseInt(regA, 2) / parseInt(regB, 2);
+              return parseInt(this.reg[parseInt(regA, 2)], 2) / parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
           case 'INC':
               return parseInt(regA, 2)++;
@@ -89,16 +89,18 @@ class CPU {
         // from the memory address pointed to by the PC. (I.e. the PC holds the
         // index into memory of the instruction that's about to be executed
         // right now.)
-
+        let IR = this.reg[this.PC];
         // !!! IMPLEMENT ME
 
         // Debugging output
-        //console.log(`${this.PC}: ${IR.toString(2)}`);
+        console.log(`${this.PC}: ${IR.toString(2)}`);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
 
         // !!! IMPLEMENT ME
+        const byteOne = this.mem[this.PC + 1];
+        const byteTwo = this.mem[this.PC + 2];
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
@@ -111,9 +113,11 @@ class CPU {
         // for any particular instruction.
 
         // !!! IMPLEMENT ME
+        this.PC++;
     }
 }
+const ram = new RAM(256);
+const cpu = new CPU(ram);
 
-
-
+cpu.tick();
 module.exports = CPU;
