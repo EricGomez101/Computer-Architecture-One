@@ -78,7 +78,7 @@ class CPU {
               return parseInt(regA, 2)++;
               break;
           case 'DEC':
-              return parseInt(regA, 2)--;
+              return regA--;
               break;
           case 'CMP':
               if (regA === regB) this.reg.fl = '00000001';
