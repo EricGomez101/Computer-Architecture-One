@@ -5,6 +5,12 @@
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
+
+const LDI = 0b10011001;
+const PRN = 0b01000011;
+const HLT = 0b00000001;
+const MUL = 0b10101010;
+
 const RAM = require('./ram.js');
 class CPU {
 
@@ -61,11 +67,12 @@ class CPU {
           case 'SUB':
               return parseInt(this.reg[parseInt(regA, 2)], 2) - parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
-          case 'MUL':
-              return parseInt(this.reg[parseInt(regA, 2)], 2) * parseInt(this.reg[parseInt(regB, 2)], 2);
+          case MUL:
+              console.log(parseInt(this.reg[regA]) * parseInt(this.reg[regB]));
+              this.PC += 3;
               break;
           case 'DIV':
-              return parseInt(this.reg[parseInt(regA, 2)], 2) / parseInt(this.reg[parseInt(regB, 2)], 2);
+              return this.reg[regA] / this.reg[regB];
               break;
           case 'INC':
               return parseInt(regA, 2)++;
@@ -78,6 +85,10 @@ class CPU {
               else if (regA > regB) this.reg.fl = '00000010';
               else this.reg.fl = '00000100';
               break;
+          default:
+              console.log("Unknown instruction: " + IR.toString(2));
+              this.stopClock();
+              return;
         }
     }
 
@@ -89,7 +100,7 @@ class CPU {
         // from the memory address pointed to by the PC. (I.e. the PC holds the
         // index into memory of the instruction that's about to be executed
         // right now.)
-        let IR = this.reg[this.PC];
+        let IR = this.ram.read(this.PC);
         // !!! IMPLEMENT ME
 
         // Debugging output
@@ -99,25 +110,43 @@ class CPU {
         // needs them.
 
         // !!! IMPLEMENT ME
-        const byteOne = this.mem[this.PC + 1];
-        const byteTwo = this.mem[this.PC + 2];
+        const opA = this.ram.read(this.PC + 1);
+        const opB = this.ram.read(this.PC + 2);
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
 
         // !!! IMPLEMENT ME
 
+
+        switch(IR) {
+            case LDI:
+                // Set the value in a register
+                this.reg[opA] = opB;
+                this.PC += 3; // Next instruction
+                break;
+
+            case PRN:
+                console.log(this.reg[opA]);
+                this.PC += 2;
+                break;
+
+            case HLT:
+                this.stopClock();
+                this.PC += 1;
+                break;
+            default:
+              this.alu(IR, opA, opB);
+              break;
+
+        }
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
 
         // !!! IMPLEMENT ME
-        this.PC++;
+
     }
 }
-const ram = new RAM(256);
-const cpu = new CPU(ram);
-
-cpu.tick();
 module.exports = CPU;
