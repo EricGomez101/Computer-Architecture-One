@@ -8,13 +8,13 @@ const fs = require('fs');
  * TODO: load this from a file on disk instead of having it hardcoded
  */
 
-const file = fs.readFileSync(`./${process.argv[2]}`, "utf-8");
+const file = fs.readFileSync(`${process.argv[2]}`, "utf-8");
 
 function loadMemory() {
 
     // Hardcoded program to print the number 8 on the console
 
-    const program = file.trim().match(/[0-1]{8}/g);
+    const program = file.match(/[0-1]{8}/g);
 
     // Load the program into the CPU's memory a byte at a time
     for (let i = 0; i < program.length; i++) {

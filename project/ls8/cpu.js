@@ -10,6 +10,8 @@ const LDI = 0b10011001;
 const PRN = 0b01000011;
 const HLT = 0b00000001;
 const MUL = 0b10101010;
+const PUSH = 0b01001101;
+const POP = 0b01001100;
 
 const RAM = require('./ram.js');
 class CPU {
@@ -24,6 +26,7 @@ class CPU {
 
         // Special-purpose registers
         this.PC = 0; // Program Counter
+        this.SP = 244;
     }
 
     /**
@@ -68,8 +71,8 @@ class CPU {
               return parseInt(this.reg[parseInt(regA, 2)], 2) - parseInt(this.reg[parseInt(regB, 2)], 2);
               break;
           case MUL:
-              console.log(parseInt(this.reg[regA]) * parseInt(this.reg[regB]));
-              this.PC += 3;
+              this.reg[regA] = parseInt(this.reg[regA]) * parseInt(this.reg[regB]);
+              // this.PC += 3;
               break;
           case 'DIV':
               return this.reg[regA] / this.reg[regB];
@@ -122,18 +125,23 @@ class CPU {
         switch(IR) {
             case LDI:
                 // Set the value in a register
-                this.reg[opA] = opB;
-                this.PC += 3; // Next instruction
+                this.reg[opA] = opB; // Next instruction
                 break;
 
             case PRN:
                 console.log(this.reg[opA]);
-                this.PC += 2;
                 break;
 
             case HLT:
                 this.stopClock();
-                this.PC += 1;
+                break;
+            case PUSH:
+                this.SP--;
+                this.poke(this.SP, this.reg[opA]);
+                break;
+            case POP:
+                this.reg[opA] = this.ram.read(this.SP);
+                this.SP++;
                 break;
             default:
               this.alu(IR, opA, opB);
@@ -146,7 +154,7 @@ class CPU {
         // for any particular instruction.
 
         // !!! IMPLEMENT ME
-
+        this.PC += (IR >> 6) + 1;
     }
 }
 module.exports = CPU;
