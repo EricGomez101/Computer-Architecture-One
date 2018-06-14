@@ -1,10 +1,10 @@
 /**
  * LS-8 v2.0 emulator skeleton code
- */
+*/
 
 /**
  * Class for simulating a simple Computer (CPU & memory)
- */
+*/
 
 const LDI = 0b10011001;
 const PRN = 0b01000011;
@@ -12,7 +12,11 @@ const HLT = 0b00000001;
 const MUL = 0b10101010;
 const PUSH = 0b01001101;
 const POP = 0b01001100;
+const CALL = 0b01001000;
+const RET = 0b00001001;
+const ADD = 0b10101000;
 
+const index = 7;
 const RAM = require('./ram.js');
 class CPU {
 
@@ -26,7 +30,7 @@ class CPU {
 
         // Special-purpose registers
         this.PC = 0; // Program Counter
-        this.SP = 244;
+        this.SP = this.reg[index] = 0xF4;
     }
 
     /**
@@ -64,14 +68,14 @@ class CPU {
      */
     alu(op, regA, regB) {
         switch (op) {
-          case 'ADD':
-              return parseInt(this.reg[parseInt(regA, 2)], 2) + parseInt(this.reg[parseInt(regB, 2)], 2);
+          case ADD:
+              this.reg[regA] = this.reg[regA] + this.reg[regB];
               break;
           case 'SUB':
-              return parseInt(this.reg[parseInt(regA, 2)], 2) - parseInt(this.reg[parseInt(regB, 2)], 2);
+              return this.reg[regA] - this.reg[regB];
               break;
           case MUL:
-              this.reg[regA] = parseInt(this.reg[regA]) * parseInt(this.reg[regB]);
+              this.reg[regA] = this.reg[regA] * this.reg[regB];
               // this.PC += 3;
               break;
           case 'DIV':
@@ -94,7 +98,10 @@ class CPU {
               return;
         }
     }
-
+    pushValue(v) {
+      this.SP--;
+      this.ram.write(this.SP, v);
+    }
     /**
      * Advances the CPU one cycle
      */
@@ -107,7 +114,7 @@ class CPU {
         // !!! IMPLEMENT ME
 
         // Debugging output
-        console.log(`${this.PC}: ${IR.toString(2)}`);
+        // console.log(`${this.PC}: ${IR.toString(2)}`);
 
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
@@ -121,32 +128,39 @@ class CPU {
 
         // !!! IMPLEMENT ME
 
-
+        this.pcAdvance = true;
         switch(IR) {
             case LDI:
                 // Set the value in a register
                 this.reg[opA] = opB; // Next instruction
                 break;
-
             case PRN:
                 console.log(this.reg[opA]);
                 break;
-
             case HLT:
                 this.stopClock();
                 break;
             case PUSH:
                 this.SP--;
-                this.poke(this.SP, this.reg[opA]);
+                this.ram.write(this.reg[index], this.reg[opA]);
                 break;
             case POP:
-                this.reg[opA] = this.ram.read(this.SP);
+                this.reg[opA] = this.ram.read(this.reg[index]);
                 this.SP++;
                 break;
+            case CALL:
+                this.pushValue(this.PC + 2);
+                this.PC = this.reg[opA];
+                this.pcAdvance = false;
+                break;
+            case RET:
+                this.PC = this.ram.read(this.SP);
+                this.SP++;
+                this.pcAdvance = false;
+                break;
             default:
-              this.alu(IR, opA, opB);
-              break;
-
+                this.alu(IR, opA, opB);
+                break;
         }
         // Increment the PC register to go to the next instruction. Instructions
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
@@ -154,7 +168,9 @@ class CPU {
         // for any particular instruction.
 
         // !!! IMPLEMENT ME
-        this.PC += (IR >> 6) + 1;
+        if (this.pcAdvance) {
+          this.PC += (IR >> 6) + 1;
+        }
     }
 }
 module.exports = CPU;

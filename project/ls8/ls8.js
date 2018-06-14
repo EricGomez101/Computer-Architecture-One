@@ -15,7 +15,6 @@ function loadMemory() {
     // Hardcoded program to print the number 8 on the console
 
     const program = file.match(/[0-1]{8}/g);
-
     // Load the program into the CPU's memory a byte at a time
     for (let i = 0; i < program.length; i++) {
         cpu.poke(i, parseInt(program[i], 2));
